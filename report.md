@@ -5,7 +5,7 @@
 **Institution:** Learnkey Institute, Malta  
 **Lecturer:** Believe Ayodele  
 **Submission date:** 22 October 2026  
-**Word count:** 4,051 (report body, including tables; references and appendix excluded).
+**Word count:** 4,055 (report body, including tables; references and appendix excluded).
 
 ## Contents
 
@@ -151,7 +151,7 @@ Disposable database and RabbitMQ integration tests verify transaction boundaries
 | End-to-end | Authenticated place-order through visible notification job | Staging deployment |
 | Load / resilience | Ten-times traffic; broker or Notification outage | Scheduled staging exercise and release readiness |
 
-The prototype tests currently cover the unit-level database and event logic. CI's image build checks container buildability, but this repository still needs a real broker-backed integration test before it can claim the whole pyramid is implemented.
+The prototype unit tests cover local data and event logic. CI also starts the Compose stack and verifies an actual order request reaches Notification with the same correlation ID. Broader contract tests, failure-injection tests and ten-times-load tests remain release-readiness work.
 
 Test repeated requests with the same idempotency key, broker outage, duplicate delivery, malformed events and consumer restart. A release gate should fail on a broken OrderPlaced contract or a migration incompatible with the prior version. Retain test results and artifact digests with the release for incident response and audit.
 
@@ -293,7 +293,7 @@ The prototype demonstrates asynchronous notification, correlation IDs and handli
 
 ## Appendix A — Repository and evidence checklist
 
-The report source and prototype are published at [https://github.com/majharulislam783/soa-assignment](https://github.com/majharulislam783/soa-assignment). The GitHub Actions workflow runs the unit tests and builds both images. Docker is unavailable in this authoring environment, so no Compose-based request or consumer screenshot is claimed here. Run the documented Compose command on a Docker host and attach genuine screenshots of the order response and matching Notification log before final submission.
+The report source and prototype are published at [https://github.com/majharulislam783/soa-assignment](https://github.com/majharulislam783/soa-assignment). GitHub Actions runs the unit tests and a Compose end-to-end check, then stores the order response and service logs as an artifact. Docker is unavailable in this authoring environment, so screenshots are not included in the PDF. After the workflow succeeds, download its `compose-e2e-evidence` artifact and capture the actual workflow result and matching order/Notification correlation ID for the submission.
 
 ## References
 

@@ -24,7 +24,58 @@ jobs:
         run: python -m pip install -r prototype/order_service/requirements.txt -r prototype/notification_service/requirements.txt pytest
       - name: Run service tests
         run: python -m pytest prototype/order_service/test_app.py prototype/notification_service/test_consumer.py -q
-      - name: Build service images
+      - name: Run Compose end-to-end check
         run: |
-          docker build -t maltashop-order:ci prototype/order_service
-          docker build -t maltashop-notification:ci prototype/notification_service
+          mkdir -p evidence
+          docker compose -f prototype/compose.yaml up --build -d
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://localhost:8000/health > /dev/null; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            docker compose -f prototype/compose.yaml ps
+            docker compose -f prototype/compose.yaml logs
+            exit 1
+          fi
+          correlation_id="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          curl --fail --silent --show-error \
+            -X POST http://localhost:8000/orders \
+            -H "Content-Type: application/json" \
+            -H "X-Correlation-ID: ${correlation_id}" \
+            -H "Idempotency-Key: ${correlation_id}" \
+            -d '{"customer_ref":"ci-customer","items":[{"sku":"lamp-1","quantity":1}]}' \
+            | tee evidence/order-response.json
+          python -c "import json; r=json.load(open('evidence/order-response.json')); assert r['status']=='ACCEPTED' and r['correlation_id']=='${correlation_id}'"
+          consumed=0
+          for attempt in $(seq 1 30); do
+            docker compose -f prototype/compose.yaml logs notification > evidence/notification.log
+            if grep --fixed-strings --quiet "${correlation_id}" evidence/notification.log \
+              && grep --fixed-strings --quiet '"event": "notification_queued"' evidence/notification.log; then
+              consumed=1
+              break
+            fi
+            sleep 2
+          done
+          docker compose -f prototype/compose.yaml logs order > evidence/order.log
+          if [ "$consumed" -ne 1 ]; then
+            docker compose -f prototype/compose.yaml ps
+            docker compose -f prototype/compose.yaml logs
+            exit 1
+          fi
+          grep --fixed-strings --quiet "${correlation_id}" evidence/order.log
+          echo "Compose order-to-notification flow passed for ${correlation_id}"
+      - name: Upload end-to-end evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compose-e2e-evidence
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Stop Compose services
+        if: always()
+        run: docker compose -f prototype/compose.yaml down --volumes

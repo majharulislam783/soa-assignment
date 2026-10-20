@@ -45,7 +45,7 @@ Swagger UI is at `http://localhost:8000/docs`; RabbitMQ management is at `http:/
 
 ## Tests and evidence
 
-The unit tests cover atomic order/outbox persistence, request idempotency, event validation, consumer deduplication and correlation-ID propagation. The GitHub Actions workflow runs the tests and builds both images. A local unit-test run is not a substitute for the assessment's requested screenshots of a Compose order request, consumed event and passing Actions workflow. Capture these from a real Docker and GitHub Actions run before submission; no screenshots or remote run have been fabricated.
+The unit tests cover atomic order/outbox persistence, request idempotency, event validation, consumer deduplication and correlation-ID propagation. GitHub Actions runs these tests, starts the full Compose stack, sends a real order request, checks that Notification consumes the event with the same correlation ID, and uploads the response and service logs as a run artifact. The assessment still asks for screenshots; capture the actual workflow and Compose evidence from the successful run rather than using simulated output.
 
 To run the unit tests locally:
 
