@@ -1,0 +1,50 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-malta}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-local-only-change-me}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  order:
+    build:
+      context: ./order_service
+    environment:
+      ORDER_DB_PATH: /data/orders.db
+      AMQP_URL: amqp://${RABBITMQ_USER:-malta}:${RABBITMQ_PASSWORD:-local-only-change-me}@rabbitmq:5672/%2F
+      OUTBOX_POLL_INTERVAL: "1"
+    ports:
+      - "8000:8000"
+    volumes:
+      - order-data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification:
+    build:
+      context: ./notification_service
+    environment:
+      NOTIFICATION_DB_PATH: /data/notifications.db
+      AMQP_URL: amqp://${RABBITMQ_USER:-malta}:${RABBITMQ_PASSWORD:-local-only-change-me}@rabbitmq:5672/%2F
+    volumes:
+      - notification-data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  rabbitmq-data:
+  order-data:
+  notification-data:

@@ -1,0 +1,30 @@
+name: Prototype CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            prototype/order_service/requirements.txt
+            prototype/notification_service/requirements.txt
+      - name: Install test dependencies
+        run: python -m pip install -r prototype/order_service/requirements.txt -r prototype/notification_service/requirements.txt pytest
+      - name: Run service tests
+        run: python -m pytest prototype/order_service/test_app.py prototype/notification_service/test_consumer.py -q
+      - name: Build service images
+        run: |
+          docker build -t maltashop-order:ci prototype/order_service
+          docker build -t maltashop-notification:ci prototype/notification_service
