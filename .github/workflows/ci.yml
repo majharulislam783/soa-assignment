@@ -68,6 +68,29 @@ jobs:
           fi
           grep --fixed-strings --quiet "${correlation_id}" evidence/order.log
           echo "Compose order-to-notification flow passed for ${correlation_id}"
+      - name: Publish real integration evidence to run summary
+        if: success()
+        run: |
+          correlation_id="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          {
+            echo "### Compose end-to-end evidence"
+            echo "Correlation ID: \`${correlation_id}\`"
+            echo
+            echo "#### Accepted order response"
+            echo '```json'
+            cat evidence/order-response.json
+            echo '```'
+            echo
+            echo "#### Order service log"
+            echo '```text'
+            grep --fixed-strings "${correlation_id}" evidence/order.log
+            echo '```'
+            echo
+            echo "#### Notification consumer log"
+            echo '```text'
+            grep --fixed-strings "${correlation_id}" evidence/notification.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload end-to-end evidence
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,0 +1,10 @@
+notification-1  | Pika version 1.3.2 connecting to ('172.18.0.2', 5672)
+notification-1  | Socket connected: <socket.socket fd=6, family=2, type=1, proto=6, laddr=('172.18.0.3', 52246), raddr=('172.18.0.2', 5672)>
+notification-1  | Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f8b4285f710>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f8b4285f710> params=<URLParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).
+notification-1  | AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f8b4285f710> params=<URLParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+notification-1  | AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f8b4285f710> params=<URLParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+notification-1  | Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7f8b4285f710> params=<URLParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>
+notification-1  | Created channel=1
+notification-1  | {"service": "notification", "event": "consumer_ready", "queue": "order.placed"}
+notification-1  | {"service": "notification", "event": "notification_queued", "event_id": "f96888d1-0d31-4f44-9b11-624d9c003259", "order_id": "d12ee24f-9aab-423d-9935-ea7535a6e1d4", "correlation_id": "ci-39474435324-1"}
+notification-1  | {"service": "notification", "event": "duplicate_ignored", "event_id": "f96888d1-0d31-4f44-9b11-624d9c003259", "order_id": "d12ee24f-9aab-423d-9935-ea7535a6e1d4", "correlation_id": "ci-39474435324-1"}

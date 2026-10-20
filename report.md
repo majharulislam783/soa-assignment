@@ -293,7 +293,7 @@ The prototype demonstrates asynchronous notification, correlation IDs and handli
 
 ## Appendix A — Repository and evidence checklist
 
-The report source and prototype are published at [https://github.com/majharulislam783/soa-assignment](https://github.com/majharulislam783/soa-assignment). GitHub Actions runs the unit tests and a Compose end-to-end check, then stores the order response and service logs as an artifact. Docker is unavailable in this authoring environment, so screenshots are not included in the PDF. After the workflow succeeds, download its `compose-e2e-evidence` artifact and capture the actual workflow result and matching order/Notification correlation ID for the submission.
+The report source and prototype are published at [https://github.com/majharulislam783/soa-assignment](https://github.com/majharulislam783/soa-assignment). GitHub Actions runs unit tests and a Compose end-to-end check, publishes the actual order response and both service logs to the run summary, and uploads the same files as an artifact. The next run's summary can be captured as genuine screenshots of the passing workflow, the accepted order response and the matching correlation ID across Order and Notification.
 
 ## References
 
