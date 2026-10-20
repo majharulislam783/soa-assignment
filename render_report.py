@@ -12,6 +12,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     BaseDocTemplate,
     Frame,
+    Image as ReportImage,
     KeepTogether,
     PageBreak,
     PageTemplate,
@@ -256,6 +257,18 @@ def make_styles():
             spaceAfter=16,
         )
     )
+    styles.add(
+        ParagraphStyle(
+            "ReportCaption",
+            fontName=FONT_ITALIC,
+            fontSize=9,
+            leading=12,
+            alignment=TA_CENTER,
+            textColor=colors.HexColor("#555555"),
+            spaceBefore=4,
+            spaceAfter=10,
+        )
+    )
     return styles
 
 
@@ -395,6 +408,29 @@ def build_story(markdown: str, styles):
             continue
         if in_code:
             code_lines.append(line)
+            i += 1
+            continue
+        image_match = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", line.strip())
+        if image_match:
+            flush_paragraph()
+            flush_table()
+            caption, source = image_match.groups()
+            image_path = (ROOT / source).resolve()
+            try:
+                image_path.relative_to(ROOT.resolve())
+            except ValueError as error:
+                raise ValueError("Report images must be inside the assignment folder") from error
+            if not image_path.is_file():
+                raise FileNotFoundError(f"Report image not found: {image_path}")
+            image = ReportImage(str(image_path))
+            scale = min(
+                (A4[0] - 50 * mm) / image.imageWidth,
+                (A4[1] - 60 * mm) / image.imageHeight,
+            )
+            image.drawWidth = image.imageWidth * scale
+            image.drawHeight = image.imageHeight * scale
+            image.hAlign = "CENTER"
+            story.append(KeepTogether([image, Paragraph(inline_markup(caption), styles["ReportCaption"])]))
             i += 1
             continue
         if line.startswith("|"):

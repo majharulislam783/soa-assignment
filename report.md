@@ -5,7 +5,7 @@
 **Institution:** Learnkey Institute, Malta  
 **Lecturer:** Believe Ayodele  
 **Submission date:** 22 October 2026  
-**Word count:** 4,055 (report body, including tables; references and appendix excluded).
+**Word count:** 4,016 (report body, including tables; references and appendix excluded).
 
 ## Contents
 
@@ -285,15 +285,19 @@ The small Dockerfiles use single-stage builds; if compilation dependencies grow,
 
 The repository includes two services and stores, REST and asynchronous event paths, Dockerfiles, Compose, CI and tests for atomic outbox persistence, idempotency, event validation, deduplication and correlation IDs. Run tests with `python -m pytest prototype/order_service/test_app.py prototype/notification_service/test_consumer.py -q` after installing requirements and pytest.
 
-Required evidence is a real screenshot of (1) the order request/response, (2) Notification logs with the same correlation ID, and (3) a passing GitHub Actions run. Docker is not installed here and no Actions run was executed, so I have not fabricated this evidence. Before submission, run Compose on a Docker host, capture the request and logs, push to the provided repository and attach a screenshot of the actual green workflow. Unit tests do not prove the broker path end to end.
-
-The request image should show the command and accepted JSON response with correlation ID; the consumer image should show the matching ID and `notification_queued` record. The CI image should identify the repository, workflow run and green status. Add captions and timestamps in an evidence appendix, and do not label unit-test output as a broker-backed demonstration.
+The Compose end-to-end test ran successfully on GitHub Actions' Docker-enabled runner. Run #3 sent an actual `POST /orders`, received HTTP 201, consumed `OrderPlaced` in Notification and retained the same correlation ID in both services. The figures in Appendix A include a browser screenshot of the successful run and visual exports from its actual response and log artifacts. The visual exports are labelled as artifact captures rather than local-terminal screenshots; the original JSON and logs are also included in the repository. Local Docker was not available, but the hosted run verifies the whole Compose path rather than only unit tests.
 
 The prototype demonstrates asynchronous notification, correlation IDs and handling of duplicate delivery. It lacks real payment/inventory orchestration, authentication, rate limits, schema governance, production databases, broker HA, dead-letter operations, load tests, secret management and telemetry export. Before launch, add broker-backed contract tests, production storage, failure-tested compensation, ten-times load testing, privacy review and rollback/restore drills. Do not claim 99.9% until measured.
 
 ## Appendix A — Repository and evidence checklist
 
-The report source and prototype are published at [https://github.com/majharulislam783/soa-assignment](https://github.com/majharulislam783/soa-assignment). GitHub Actions runs unit tests and a Compose end-to-end check, publishes the actual order response and both service logs to the run summary, and uploads the same files as an artifact. The next run's summary can be captured as genuine screenshots of the passing workflow, the accepted order response and the matching correlation ID across Order and Notification.
+The report source and prototype are published at [https://github.com/majharulislam783/soa-assignment](https://github.com/majharulislam783/soa-assignment). [GitHub Actions run #3](https://github.com/majharulislam783/soa-assignment/actions/runs/39475638947) completed successfully in 1 minute 5 seconds and uploaded the `compose-e2e-evidence` artifact. It recorded order `97a775ea-f62a-4937-a5bf-022b622168d9` and correlation ID `ci-39475638947-1`; that same ID appears in the Order and Notification logs below.
+
+![Figure A1. Browser screenshot of the passing GitHub Actions Compose integration run.](evidence/pipeline-pass.png)
+
+![Figure A2. Request and HTTP 201 response exported from the actual Compose CI artifact.](evidence/order-request-response.png)
+
+![Figure A3. Order acceptance and Notification consumer logs from the same CI artifact, with the matching correlation ID.](evidence/correlation-logs.png)
 
 ## References
 
